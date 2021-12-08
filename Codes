@@ -1,273 +1,310 @@
-import keras
-from keras.models import Sequential
-from keras.layers import Activation
-from keras.layers.core import Dense
-from keras.optimizers import Adam
-from keras.metrics import categorical_crossentropy
-from keras.preprocessing.image import ImageDataGenerator
-from keras.layers.normalization import BatchNormalization
-from keras.layers.convolutional import Conv2D
+import numpy as np
+np.random.seed(42)
 
-import tensorflow
-from tensorflow import keras
+import tensorflow as tf
+tf.random.set_seed(2)
+
+
+from keras.datasets import fashion_mnist
+(train_X, train_Y), (test_X, test_Y) = fashion_mnist.load_data()
+
+
+plot_heatmap(22)
+
+plot3d(22)
+
+from skimage.filters import laplace
+
+plot_heatmap(train_X[55])
+plot_heatmap(laplace(train_X[55]))
+
+
+plot_heatmap(v_edge)
+plot_heatmap(convolute(v_edge, padd=0))
+
+example = 1222 
+
+conv_0  = train_X[example]
+
+conv_1  = convolute(conv_0, padd=1)
+conv_2  = convolute(conv_1, padd=1)
+conv_3  = convolute(conv_2, padd=1)
+
+plot_heatmap(conv_0)
+plot_heatmap(conv_1)
+plot_heatmap(conv_2)
+plot_heatmap(conv_3)
+
+plot_heatmap(v_edge)
+plot_heatmap(convolute(v_edge, fil=sharp_filter, padd=1))
+
+plot_heatmap(cross)
+plot_heatmap(convolute(cross, fil=sharp_filter, padd=1))
+
+example = 1222
+
+plot_heatmap(train_X[example])
+plot_heatmap(convolute(train_X[example], fil=sharp_filter, padd=1))
+
+plot_heatmap(pooling(pooling(v_edge)))
+
+plot_heatmap(pooling(pooling(cross)))
+
+test = noisify(np.zeros([10,10]), noise=0.4)
+max_val  = np.max(test)
+min_val  = np.min(test)
+test_avg = pooling(test, mode = 'av')
+test_max = pooling(test, mode = 'mx')
+
+plot_heatmap(test)
+plot_heatmap(test_avg, vmin=min_val, vmax=max_val)
+print('Die Farbe variiert um '+ str(np.max(test_avg)-np.min(test_avg)))
+plot_heatmap(test_max, vmin=min_val, vmax=max_val)
+print('Die Farbe variiert um ' +str(np.max(test_max)-np.min(test_max)))
+
+noise_cross = noisify(cross)
+
+plot_heatmap(noise_cross)
+plot_heatmap(pooling(noise_cross))
+
+noise_v_edge = noisify(v_edge, noise=0.5)
+
+plot_heatmap(noise_v_edge)
+plot_heatmap(pooling(noise_v_edge))
+
+noisy_image = noisify(train_X[9])
+
+plot_heatmap(noise_image)
+plot_heatmap(pooling(noisy_image))
+
+from keras.datasets import fashion_mnist
+(train_X, train_Y), (test_X, test_Y) = fashion_mnist.load_data()
+
+import numpy as np
+tf.random.set_seed(200)
+
+
+import tensorflow.keras
+
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Activation, Dense, BatchNormalization, Conv2D
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Dropout, InputLayer, BatchNormalization
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.metrics import categorical_crossentropy
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-
-
-from numpy.random import seed
-seed(1)
-
-import tensorflow as tf
-tf.random.set_seed(2)
-
-from tensorflow.keras.models import sequential
-from tensorflow.keras.layers import Dense
-
-from sklearn.model_selection import train_test_split
-
-
-from functions import *
-
-
-data_2class, targets_2class, colors_2class = load_data(total_data_points=600, nr_clusters=2)
-
-plot_data(data_2class, colors_2class)
-
-
-train_x, test_x, train_y, test_y = train_test_split(data_2class,
-                                                   targets_2class,
-                                                   test_size = 0.1,
-                                                   random_state=42)
-
-
-perc_model = tf.keras.models.sequential([Dense(1,
-                                              input_shape=(2,),
-                                              activation=‘sigmoid')])
-
-perc_model.compile(loss='binary_crossentropy',
-                   optimiser = 'SGD',
-                   metrics = [‘accuracy'])
-
-perc_model_hist = perc_model.fit(train_x,
-                                 train_y,
-                                 epochs=1,
-                                 batch_size=1,
-                                 validation_split=0.1)
-
-
-
-data_circle, targets_circle, colors_circle = load_circular_data(1000)
-
-plot_circle_data(data_circle, targets_circle, colors_circle)
-
-
-
-plot_transformed_data(transform_polar(data_circle), colors_circle)
-
-
-data_circle_train, data_circle_test, targets_circle_train, targets_circle_test = train_test_split(data_circle,
-                                                                                                  targets_circle,
-                                                                                                  test_size=0.1,
-                                                                                                  random_state=42)
-
-
-circle_model = tf.keras.models.sequential([
-    Dense(12, input_shape=(2,), activation = 'relu'),
-    Dense(6, activation='relu'),
-    Dense(1, activation=‘sigmoid')])
-
-
-circle_model.compile(loss='binary_crossentropy',
-                     optimiser='sgd',
-                     metrics =[‘accuracy'])
-
-
-circle_model_hist=circle_model.fit(data_circle_train,
-                                    targets_circle_train,
-                                    epochs =15,
-                                    batch_size=2,
-                                    validation_split=0.1)
-
-
-plot_decision_boundary_complex(data_circle,
-                              100,
-                              circle_model,
-                              colors_circle,
-                              cmap_range=0.5,
-                              s=20,
-                              alpha=0.8)
-
-predict_y=circle_model.predict(data_circle_test)
-print(predict_y[0:5])
-
-test_evaluation(predict_y, targets_circle_test)
-
-circle_model_hist.history.keys()
-
-plot_loss(circle_model_hist)
-
-
-
-
-
-
-
-
-
-
-from numpy.random import seed
-seed(1)
-import tensorflow as tf
-tf.random.set_seed(2)
-
-from tensorflow.keras.models import sequential
-from tensorflow.keras.layers import Dense
 from tensorflow.keras import initializers
 
+plot_heatmap(233)
 
-from sklearn.model_selection import train_test_split
+plot_dist(mode='relate')
 
-from functions import *
+train_X=train_X/255
+test_X=test_X/255
 
+im_rows = 28
+im_cols = 28
 
-
-
-days, revenue =  load_linear_data(270)
-x_train, y_train, x_test, y_test = train_test_split(days, 
-                                                    revenue,
-                                                    random_state=42,
-                                                    test_Size = 0.1)
-
-plot_linear_data(days, revenue)
+im_shape = (im_rows, im_cols, 1)
+train_X = train_X.reshape(train_X.shape[0], *im_shape)
+test_X = test_X.reshape(test_X.shape[0], *im_shape) # shapes value into single column but rest rows
 
 
+num_classes=10
 
 
-first_model = Sequential(Dense(1, 
-                              input_shape=(1,),
-                              activation=‘linear'))
+model_top = tensorflow.keras.models.Sequential([
+    tensorflow.keras.layers.Flatten(input_shape=(28,28,1)),
+    tensorflow.keras.layers.Dense(784, activatin='relu'),
+    tensorflow.keras.layers.Dense(516, activatin='relu')
+    tensorflow.keras.layers.Dense(256, activatin='relu')
+    tensorflow.keras.layers.Dense(128, activatin='relu')
+    tensorflow.keras.layers.Dense(64,  activatin='relu')
+    tensorflow.keras.layers.Dense(10,  activatin='softmax' )
+])
 
+model_top.compile(
+loss='sparse_categorical_crossentropy',
+optimizer=tensorflow.keras.optimizers.Adam(0.005),
+metrics=['accuracy'],
+)
 
+model_top = tensorflow.keras.models.Sequential([
+    tensorflow.keras.layers.Flatten(input_shape=(28,28,1)),
+    tensorflow.keras.layers.Dense(784,activation='relu')
+    tensorflow.keras.layers.Dense(516,activation='relu')
+    tensorflow.keras.layers.Dense(256,activation='relu')
+    tensorflow.keras.layers.Dense(128,activation='relu')
+    tensorflow.keras.layers.Dense(128,activation='relu')
+    tensorflow.keras.layers.Dense(64,activation='relu')
+    tensorflow.keras.layers.Dense(10,activation='softmax')
+])
 
-first_model.compile(loss='mean_squared_error',
-                    optimiser='sgd',
-                    metrics = [‘mean_absolute_percentage_error'])
+model_top.compile(
+    loss='sparse_categorical_crossentropy',
+    optimizer=tensorflow.keras.optimizers.Adam(0.005),
+    metrics=['accuracy'],
+    )
+    
+hist_model_top = model_top.fit(train_X, train_Y,
+                               batch_size=500,
+                               epochs=10,
+                               validation_data=(test_X, test_Y),
+    )
+    
+print(model_top.summary())
 
+plot_performance(hist_model_top)
 
+cnn_model = Sequential([
+    conv2D(filters=32, kernel_size=(3,3), activation='relu', input_shape=im_shape),
+    Flatten(), # flatten out the layers
+    Dropout(0.35),
+    Dense(32, activation='relu'),
+    Dense(10, activation = 'softmax')
+    ])
 
-first_model_hist=first_model.fit(days,
-                                 revenue,
-                                 epochs=7,
-                                 batch_size=100,
-                                 validation_split=0.1)
+cnn_model.compile(loss='sparse_categorical_crossentropy',
+                  optimizer=tensorflow.keras.optimizers.Adam(0.01),
+                 metrics=['accuracy'],
+                 )
+               
+cnn_model.summary()
 
+histor = cnn_model.fit(
+         train_X,
+         train_Y,
+         batch_size=100,
+         epochs=5,
+         validation_data=(test_X, test_Y),
+)
 
-plot.weights()
+plot_performance(history)
 
+cnn2_model = Sequenctial([
+    Conv2D(filters=32, kernel_size=5, activation='relu', input_shape= im_shape),
+    MaxPooling2D(pool_size=2), # downsampling the output instead of 28*28 it is 14*14
+    Conv2D(filters=32, kernel_size=5, activation='relu'),
+    MaxPooling2D(pool_size=2), # down sampling the output instead of 28*28 it is 14*14
+    Dropout(0,2),
+    Flatten(),
+    Dense(32, activation = 'relu'),
+    Dense(10, activation = 'softmax')
+    ])
+    
 
-reg_model = Sequential(Dense(1,
-                             use_bias=True,
-                             input_shape=(1,),
-                             activation='Linear',
-                             kernel_initializer=initializers.RandomNormal(stddev=0.01),
-                             bias_initializer=initializers.Zeros()))
+cnn2_model.compile(
+loss='sparse_categorical_crossentropy',
+loss='sparse_categorical_crossentropy',
+optimizer=tensorflow.keras.optimizers.Adam(0.01),
+metrics=['accuracy'],
+)
 
+history2 = cnn2_model.fit(
+    train_X,
+    train_Y,
+    batch_size=100,
+    epochs=10,
+    validation_data=(test_X, test_y),
+    )
+    
+plot_performance(history2)
 
+initializer=tf.keras.initializers.RandomNormal(stddev=0.01)
 
+cnn3_model = Sequential([Conv2D(32,
+                                (3, 3),
+                                padding='same',
+                                input_shape=im_shape,
+                                activation='relu',
+                                kernel_initializer=initializer,
+                                bias_initialier=initializer),
+                         BarchNormalization(axis=-1),
+                         Conv2D(32,
+                                (3, 3),
+                                padding='same',
+                                activation='relu',
+                                kernel_initializer=initializer,
+                                bias_initializer=initializer),
+                         BarchNormalization(axis=-1),
+                         MaxPooling2D(pool_size=(2, 2)),
+                         Dropout(0.25),
+                         Conv2D(64,
+                                (3,3),
+                                padding='same',
+                                activation='relu',
+                                kernel_initializer=initializer,
+                                bias_initializer=initializer),
+                         BarchNormalization(axis=-1),
+                         MaxPooling2D(pool_size=(2,2)),
+                         Dropout(0.25),
+                         Conv2D(64,
+                                (3,3),
+                                padding='same',
+                                activation='relu',
+                                kernel_initializer=initializer,
+                                bias_initializer=initializer),
+                         BarchNormalization(axis=-1),
+                         MaxPooling2D(pool_size=(2,2)),
+                         Dropout(0.25),
+                         Flatten(),
+                         Dense(512, 
+                               activation='relu',
+                               kernel_initializer=initializer,
+                               bias_initializer=initializer),
+                         BarchNormalization(axis=-1),
+                         Dense(num_classes,
+                               activation='softmax',
+                               kernel_initializer=initializer,
+                               bias_initializer=tf.keras.initializers.Constant(0.1)),
+                         ])
+                         
+           
+           
+cnn3_model.compile(
+loss='sparse_categorical_crossentropy',
+optimizer=tensorflow.keras.optimizers.Adam(decay=0.0001),
+metrics=['accuracy'],
+)         
+ 
+history3 = cnn3_model.fit(
+    train_X, 
+    train_Y, 
+    batch_size=10,
+    epochs=3,
+    validation_data=(test_X, test_Y),
+)
+           
+ 
+print(cnn3_model.summary())
 
-reg_model.compile(loss='mean_squared_error',
-                  optimizer='adam',
-                  metrics = [‘mean_absolute_percentage_error'])
+tensorflow.keras.utils.plot.model(
+cnn3_model, to_file='00_02_03_pic05_cnn3_model.png', show_shape=True, show_layer_names=True,
+rankdir='TB', expland_nested=True, dpi=96
+)
 
-
-reg_model_hist = reg_model.fit(days,
-                               revenue,
-                               epochs=6,
-                               batch_size=2,
-                               validation_split=0.1,
-                               verbose=1)
-
-
-
-create_forecast(reg_model,
-                400,
-                days,
-                revenue)
-
-
-x_data, Y_data = load_pricing_data()
-plot_pricing_data(x_data, Y_data)
-
-
-
-model = sequential(Dense(1,
-                         use_bias=True,
-                         input_shape=(1,)
-                         activation='linear',
-                         kernel_initializer=initializers.RandomNormal(stddev=0.01),
-                         bias_initializer=initializer.Zeros()))
-
-
-model.compile(optimizer=tf.keras.optimisers.Adam(learning_rate=1),
-              loss='mean_squared_error',
-              metrics=[‘mean_absolute_percentage_error'])
-
-
-
-model.hist = model.fit(x_data,
-                       Y_data,
-                       epochs=20,
-                       batch_size=2,
-                       validation_split=0.1)
-
-
-create_prediction(model, x_data, Y_data)
-
-
-
-
-
-
-
-
-
-
-
-
-
-komplex_model = Sequential([Dense(256,
-                                  activation='relu',
-                                  kernel_initializer=initializers.RandomNormal(stddev=0.01),
-                                  bias_initializer=initializers.Zeros()),
-                            Dense(256, 
-                                  activation='relu',
-                                  kernel_initializer=initializers.RandomNormal(stddev=0.01),
-                                  bias_initializer=initializers.Zeros()),
-                            Dense(64, 
-                                  activation='relu',
-                                  kernel_initializer=initializers.RandomNormal(stddev=0.01),
-                                  bias_initializer=initializers.Zeros()),
-                            Dense(64, 
-                                  activation='relu',
-                                  kernel_initializer=initializers.RandomNormal(stddev=0.01),
-                                  bias_initializer=initializers.Constant(0.1)),
-                            Dense(1, 
-                                  activation=‘linear')])
-
-
-x_data_rescale = rescale(x_data, mode = 'mini')
-Y_data_rescale = rescale(Y_data, mode = 'mini')
-
-plt.scatter(x_data_rescale, Y_data_rescale):
-
-
-
-komplex_model.compile(loss='mean_squared_error',
-                      optimiser=tf.keras.optimizers.Adam(lr=0.001)
-                      metrics=[‘mean_absolute_error'])
-
-
-x_data_rescale, Y_data_rescale = shuffle(x_data_rescale, Y_)
+plot_performance(history3)
+           
+cnn3_model.save('./model')          
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
